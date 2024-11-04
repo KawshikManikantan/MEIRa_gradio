@@ -216,8 +216,11 @@ class BaseMemory(nn.Module):
         # print(pair_vec)
         pair_score = self.mem_coref_mlp(pair_vec)
         coref_score = torch.squeeze(pair_score, dim=-1)  # [B,E]
-        zero_col = torch.zeros(coref_score.shape[0], 1).to(self.device)
-        coref_new_score = torch.cat([coref_score, zero_col], dim=-1)  ## [B,E+1]
+        # zero_col = torch.zeros(coref_score.shape[0], 1).to(self.device)
+        base_col = (
+            torch.ones(coref_score.shape[0], 1).to(self.device) * self.config.thresh
+        )
+        coref_new_score = torch.cat([coref_score, base_col], dim=-1)  ## [B,E+1]
 
         return coref_new_score
 
@@ -297,8 +300,10 @@ class BaseMemory(nn.Module):
         )
 
         # Use a dummy score of 0 for froming a new cluster
+        print("Threshold: ", self.config.thresh)
         coref_new_score = torch.cat(
-            ([coref_score, torch.tensor([0.0], device=self.device)]), dim=0
+            ([coref_score, torch.tensor([self.config.thresh], device=self.device)]),
+            dim=0,
         )
         coref_new_score = coref_new_score * coref_new_mask + (1 - coref_new_mask) * (
             -1e4

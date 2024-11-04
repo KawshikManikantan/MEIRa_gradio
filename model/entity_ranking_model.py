@@ -468,6 +468,8 @@ class EntityRankingModel(nn.Module):
             document["representatives"]
         ), "Representatives are not sorted."
 
+        print("Device: ", self.device)
+        print("#" * 40)
         pred_mentions_list, pred_mention_emb_list, mention_scores, pred_actions = (
             [],
             [],

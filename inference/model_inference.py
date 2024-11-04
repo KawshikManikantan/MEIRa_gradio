@@ -137,6 +137,7 @@ class Inference:
             if path.exists(doc_encoder_dir):
                 self.config.model.doc_encoder.transformer.model_str = doc_encoder_dir
 
+        self.config.model.memory.thresh = 0.5
         self.model = EntityRankingModel(self.config.model, self.config.trainer)
 
         # Document encoder parameters will be loaded via the huggingface initialization
@@ -188,7 +189,7 @@ class Inference:
             for ment_start, ment_end in idx_cluster:
                 cur_cluster.append(
                     (
-                        (ment_start, ment_end),
+                        (subtoken_map[ment_start], subtoken_map[ment_end]),
                         " ".join(
                             orig_tokens[
                                 subtoken_map[ment_start] : subtoken_map[ment_end] + 1
@@ -209,12 +210,12 @@ class Inference:
         ]
 
         return {
-            "tokenized_doc": tokenized_doc,
+            "tokenized_doc": tokenized_doc["orig_tokens"],
             "clusters": clusters,
-            "subtoken_idx_clusters": idx_clusters,
-            "actions": pred_actions,
-            "mentions": pred_mentions,
-            "representative_embs": entity_cluster_states["mem"],
+            # "subtoken_idx_clusters": idx_clusters,
+            # "actions": pred_actions,
+            # "mentions": pred_mentions,
+            # "representative_embs": entity_cluster_states["mem"],
             "representative_names": ent_names,
         }
 
